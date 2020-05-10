@@ -24,13 +24,11 @@ import java.util.UUID;
 @Slf4j
 public class WidgetController {
     private final WidgetService widgetService;
-    private final PagedResourcesAssembler<Widget> pagedResourcesAssembler;
     private final AquariumDtoAssembler aquariumDtoAssembler;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    //TODO: default 10 max 500 page size
-    public PagedModel<WidgetResponseDto> findAll(Pageable pageable) {
+    public PagedModel<WidgetResponseDto> findAll(Pageable pageable, PagedResourcesAssembler<Widget> pagedResourcesAssembler) {
         Page<Widget> all = widgetService.findAll(pageable);
         return pagedResourcesAssembler.toModel(all, aquariumDtoAssembler);
     }

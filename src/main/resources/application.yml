@@ -11,4 +11,8 @@ spring:
     console:
       enabled: true
       path: /h2
+  data:
+    rest:
+      default-page-size: 10
+      max-page-size: 500
 
