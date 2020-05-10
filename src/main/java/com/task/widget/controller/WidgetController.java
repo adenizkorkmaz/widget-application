@@ -1,9 +1,10 @@
 package com.task.widget.controller;
 
-import com.task.widget.assembler.AquariumDtoAssembler;
+import com.task.widget.assembler.WidgetDtoAssembler;
 import com.task.widget.model.Widget;
 import com.task.widget.model.WidgetDto;
 import com.task.widget.model.WidgetResponseDto;
+import com.task.widget.model.WidgetSearchDto;
 import com.task.widget.service.WidgetService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,30 +25,40 @@ import java.util.UUID;
 @Slf4j
 public class WidgetController {
     private final WidgetService widgetService;
-    private final AquariumDtoAssembler aquariumDtoAssembler;
+    private final WidgetDtoAssembler widgetDtoAssembler;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public PagedModel<WidgetResponseDto> findAll(Pageable pageable, PagedResourcesAssembler<Widget> pagedResourcesAssembler) {
-        Page<Widget> all = widgetService.findAll(pageable);
-        return pagedResourcesAssembler.toModel(all, aquariumDtoAssembler);
+    public PagedModel<WidgetResponseDto> findAll(@Valid WidgetSearchDto searchDto,
+                                                 Pageable pageable, PagedResourcesAssembler<Widget> pagedResourcesAssembler) {
+        Page<Widget> all = widgetService.findAll(pageable, searchDto);
+        return pagedResourcesAssembler.toModel(all, widgetDtoAssembler);
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Widget findById(@PathVariable("id") UUID id) {
-        return widgetService.findById(id);
+    public WidgetResponseDto findById(@PathVariable("id") UUID id) {
+        Widget widget = widgetService.findById(id);
+        return widgetDtoAssembler.toModel(widget);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Widget create(@Valid @RequestBody WidgetDto widgetDto) {
-        return widgetService.create(widgetDto);
+    public WidgetResponseDto create(@Valid @RequestBody WidgetDto widgetDto) {
+        Widget widget = widgetService.create(widgetDto);
+        return widgetDtoAssembler.toModel(widget);
     }
 
     @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Widget update(@PathVariable("id") UUID id, @Valid @RequestBody WidgetDto widgetDto) {
-        return widgetService.update(id, widgetDto);
+    @ResponseStatus(HttpStatus.OK)
+    public WidgetResponseDto update(@PathVariable("id") UUID id, @Valid @RequestBody WidgetDto widgetDto) {
+        Widget widget = widgetService.update(id, widgetDto);
+        return widgetDtoAssembler.toModel(widget);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void delete(@PathVariable("id") UUID id) {
+        widgetService.delete(id);
     }
 }

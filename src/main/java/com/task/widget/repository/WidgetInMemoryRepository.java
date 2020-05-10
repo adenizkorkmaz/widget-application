@@ -3,42 +3,44 @@ package com.task.widget.repository;
 import com.task.widget.model.Widget;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Collectors;
 
 @Repository
 @ConditionalOnProperty(name = "storage.type", havingValue = "memory")
 @Slf4j
 public class WidgetInMemoryRepository implements WidgetRepository {
 
-    private ConcurrentSkipListSet<Widget> widgets = new ConcurrentSkipListSet<>(Comparator.comparingInt(Widget::getZ));
+    private ConcurrentSkipListSet<Widget> widgets = new ConcurrentSkipListSet<>(Comparator.comparingInt(Widget::getZzIndex));
 
     @Override
-    public Page<Widget> findAll(Pageable pageable) {
-        List<Widget> widgetList = new Vector<>(this.widgets);
-        long start = pageable.getOffset();
-        long end = (start + pageable.getPageSize()) > widgets.size() ? widgets.size() : (start + pageable.getPageSize());
-        return new PageImpl<>(widgetList.subList(Math.toIntExact(start), Math.toIntExact(end)), pageable, widgetList.size());
+    public Widget findFirstByOrderByZzIndexDesc() {
+        if (widgets.isEmpty()) {
+            return null;
+        }
+        return widgets.last();
+    }
+
+    @Override
+    public Widget findByZzIndex(Integer zIndex) {
+        return widgets.stream().filter(widget -> widget.getZzIndex().equals(zIndex)).findFirst().orElse(null);
+    }
+
+    @Override
+    public List<Widget> findByZzIndexGreaterThanEqual(Integer zIndex) {
+        return widgets.stream().filter(widget -> widget.getZzIndex().compareTo(zIndex) >= 0).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Widget> findByOrderByZzIndexAsc() {
+        return new ArrayList<>(this.widgets);
     }
 
     @Override
     public Widget save(Widget widget) {
-        log.info(widget.toString());
-        if (widget.getZ() == null) {
-            Widget last = widgets.last();
-            widget.setZ(last.getZ() + 1);
-        } else {
-            if (widgets.add(widget)) {
-                return widget;
-            }
-            NavigableSet<Widget> newSet = widgets.tailSet(widget, true);
-            newSet.forEach(w -> w.setZ(w.getZ() + 1));
-        }
         widgets.add(widget);
         return widget;
     }

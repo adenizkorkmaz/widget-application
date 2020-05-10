@@ -11,9 +11,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class AquariumDtoAssembler extends RepresentationModelAssemblerSupport<Widget, WidgetResponseDto> {
+public class WidgetDtoAssembler extends RepresentationModelAssemblerSupport<Widget, WidgetResponseDto> {
 
-    public AquariumDtoAssembler() {
+    public WidgetDtoAssembler() {
         super(WidgetController.class, WidgetResponseDto.class);
     }
 
@@ -21,15 +21,9 @@ public class AquariumDtoAssembler extends RepresentationModelAssemblerSupport<Wi
     public WidgetResponseDto toModel(Widget entity) {
         WidgetResponseDto responseDto = new WidgetResponseDto();
         BeanUtils.copyProperties(entity, responseDto);
+        responseDto.setZ(entity.getZzIndex());
         responseDto.add(linkTo(methodOn(WidgetController.class).findById(responseDto.getId())).withSelfRel());
         return responseDto;
     }
-
-//    @Override
-//    public CollectionModel<WidgetResponseDto> toCollectionModel(Iterable<? extends Widget> entities) {
-//        CollectionModel<WidgetResponseDto> widgetResponseDtos = super.toCollectionModel(entities);
-//        widgetResponseDtos.add(linkTo(methodOn(WidgetController.class).findAll()).withSelfRel());
-//        return widgetResponseDtos;
-//    }
 
 }

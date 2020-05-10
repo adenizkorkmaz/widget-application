@@ -24,11 +24,12 @@ public class Widget {
 
     private Integer y;
 
-    private Integer z;
+    private Integer zzIndex;
 
     private Integer width;
 
     private Integer height;
 
     private LocalDateTime lastModificationDate;
+
 }

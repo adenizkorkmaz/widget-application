@@ -1,5 +1,7 @@
 package com.task.widget.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +15,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class WidgetResponseDto extends PagedModel<WidgetResponseDto> {
     private UUID id;
 
