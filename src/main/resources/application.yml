@@ -9,9 +9,10 @@ spring:
       enabled: true
       path: /h2
   data:
-    rest:
-      default-page-size: 10
-      max-page-size: 500
+    web:
+      pageable:
+        max-page-size: 500
+        default-page-size: 10
 
 
 storage:
