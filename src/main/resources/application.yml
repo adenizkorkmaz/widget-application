@@ -1,0 +1,14 @@
+storage:
+  type: memory
+
+spring:
+  hateoas:
+    use-hal-as-default-json-media-type: false
+  jpa:
+    hibernate:
+      ddl-auto: update
+  h2:
+    console:
+      enabled: true
+      path: /h2
+
