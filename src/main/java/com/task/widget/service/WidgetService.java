@@ -1,5 +1,6 @@
 package com.task.widget.service;
 
+import com.task.widget.exception.NotFoundException;
 import com.task.widget.model.Widget;
 import com.task.widget.model.WidgetDto;
 import com.task.widget.model.WidgetSearchDto;
@@ -11,8 +12,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class WidgetService {
     private final WidgetRepository repository;
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Widget create(WidgetDto widgetDto) {
         Widget widget = new Widget();
         widget.setId(UUID.randomUUID());
@@ -32,6 +35,7 @@ public class WidgetService {
         return saveWidget(widget);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Widget update(UUID id, WidgetDto widgetDto) {
         Widget widget = findById(id);
         repository.delete(widget);
@@ -68,13 +72,14 @@ public class WidgetService {
         });
     }
 
-    public Page<Widget> findAll(Pageable pageable, @Valid WidgetSearchDto searchDto) {
+    public Page<Widget> findAll(Pageable pageable, WidgetSearchDto searchDto) {
         List<Widget> byOrderByZzIndexAsc = repository.findByOrderByZzIndexAsc();
-        return PageAssembler.getPage(pageable, byOrderByZzIndexAsc);
+        List<Widget> filtered = WidgetFilter.filterWidgets(searchDto, byOrderByZzIndexAsc);
+        return PageAssembler.getPage(pageable, filtered);
     }
 
     public Widget findById(UUID id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Not Found"));
+        return repository.findById(id).orElseThrow(() -> new NotFoundException("Widget Not Found", id));
     }
 
     public void delete(UUID id) {

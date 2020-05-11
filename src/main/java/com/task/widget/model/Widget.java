@@ -32,4 +32,20 @@ public class Widget {
 
     private LocalDateTime lastModificationDate;
 
+    public Coordinate getLowerLeftCorner() {
+        return new Coordinate(x - (width / 2), y - (height / 2));
+    }
+
+    public Coordinate getUpperRightCorner() {
+        return new Coordinate(x + (width / 2), y + (height / 2));
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class Coordinate {
+        private Integer x;
+        private Integer y;
+
+    }
+
 }
