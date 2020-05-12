@@ -90,6 +90,14 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>**/exception/**</exclude>
+                        <exclude>**/configuration/**</exclude>
+                        <exclude>**/model/**</exclude>
+                        <exclude>**/WidgetApplication.class</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
