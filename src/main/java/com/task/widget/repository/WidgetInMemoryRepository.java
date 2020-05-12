@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class WidgetInMemoryRepository implements WidgetRepository {
 
-    private ConcurrentSkipListSet<Widget> widgets = new ConcurrentSkipListSet<>(Comparator.comparingInt(Widget::getZzIndex));
+    private final ConcurrentSkipListSet<Widget> widgets = new ConcurrentSkipListSet<>(Comparator.comparingInt(Widget::getZzIndex));
 
     @Override
     public Widget findFirstByOrderByZzIndexDesc() {
@@ -50,13 +50,12 @@ public class WidgetInMemoryRepository implements WidgetRepository {
         return widgets.stream().filter(widget1 -> widget1.getId().equals(uuid)).findFirst();
     }
 
-    public void deleteById(UUID uuid) {
-        Widget widget = findById(uuid).orElseThrow(() -> new RuntimeException("Not Found"));
-        widgets.remove(widget);
-    }
-
     @Override
     public void delete(Widget widget) {
         widgets.remove(widget);
+    }
+
+    public ConcurrentSkipListSet<Widget> getWidgets() {
+        return widgets;
     }
 }
