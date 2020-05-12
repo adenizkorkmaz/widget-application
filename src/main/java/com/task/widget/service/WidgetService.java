@@ -12,37 +12,49 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Service
 @AllArgsConstructor
 @Slf4j
 public class WidgetService {
     private final WidgetRepository repository;
+    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Widget create(WidgetDto widgetDto) {
-        Widget widget = new Widget();
-        widget.setId(UUID.randomUUID());
-        widget.setLastModificationDate(LocalDateTime.now());
-        widget.setZzIndex(widgetDto.getZ());
-        BeanUtils.copyProperties(widgetDto, widget);
-        return saveWidget(widget);
+        Lock writeLock = rwLock.writeLock();
+        writeLock.lock();
+        try {
+            Widget widget = new Widget();
+            widget.setId(UUID.randomUUID());
+            widget.setLastModificationDate(LocalDateTime.now());
+            widget.setZzIndex(widgetDto.getZ());
+            BeanUtils.copyProperties(widgetDto, widget);
+            return saveWidget(widget);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Widget update(UUID id, WidgetDto widgetDto) {
-        Widget widget = findById(id);
-        repository.delete(widget);
-        widget.setLastModificationDate(LocalDateTime.now());
-        widget.setZzIndex(widgetDto.getZ());
-        BeanUtils.copyProperties(widgetDto, widget);
-        return saveWidget(widget);
+        Lock writeLock = rwLock.writeLock();
+        writeLock.lock();
+        try {
+            Widget widget = repository.findById(id).orElseThrow(() -> new NotFoundException("Widget Not Found", id));
+            repository.delete(widget);
+            widget.setLastModificationDate(LocalDateTime.now());
+            widget.setZzIndex(widgetDto.getZ());
+            BeanUtils.copyProperties(widgetDto, widget);
+            return saveWidget(widget);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     private Widget saveWidget(Widget widget) {
@@ -73,17 +85,38 @@ public class WidgetService {
     }
 
     public Page<Widget> findAll(Pageable pageable, WidgetSearchDto searchDto) {
-        List<Widget> byOrderByZzIndexAsc = repository.findByOrderByZzIndexAsc();
-        List<Widget> filtered = WidgetFilter.filterWidgets(searchDto, byOrderByZzIndexAsc);
+        Lock readLock = rwLock.readLock();
+        readLock.lock();
+
+        List<Widget> widgetList;
+        try {
+            widgetList = repository.findByOrderByZzIndexAsc();
+        } finally {
+            readLock.unlock();
+        }
+
+        List<Widget> filtered = WidgetFilter.filterWidgets(searchDto, widgetList);
         return PageAssembler.getPage(pageable, filtered);
     }
 
     public Widget findById(UUID id) {
-        return repository.findById(id).orElseThrow(() -> new NotFoundException("Widget Not Found", id));
+        Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            return repository.findById(id).orElseThrow(() -> new NotFoundException("Widget Not Found", id));
+        } finally {
+            readLock.unlock();
+        }
     }
 
     public void delete(UUID id) {
-        Widget byId = findById(id);
-        repository.delete(byId);
+        Lock writeLock = rwLock.writeLock();
+        writeLock.lock();
+        try {
+            Widget byId = repository.findById(id).orElseThrow(() -> new NotFoundException("Widget Not Found", id));
+            repository.delete(byId);
+        } finally {
+            writeLock.unlock();
+        }
     }
 }
