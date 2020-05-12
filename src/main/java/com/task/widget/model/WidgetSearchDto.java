@@ -11,13 +11,13 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WidgetSearchDto {
-    private String filter;
-    private Integer lowerX;
-    private Integer lowerY;
-    private Integer upperX;
-    private Integer upperY;
+    /**
+     * /widgets?lowerLeft=0:0&upperRight=100:150
+     */
+    private String lowerLeft;
+    private String upperRight;
 
     public boolean isNull() {
-        return Stream.of(lowerX, lowerY, upperX, upperY).anyMatch(Objects::isNull);
+        return Stream.of(lowerLeft, upperRight).anyMatch(Objects::isNull);
     }
 }
