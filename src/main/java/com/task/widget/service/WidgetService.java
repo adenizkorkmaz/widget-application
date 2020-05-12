@@ -6,14 +6,13 @@ import com.task.widget.model.WidgetDto;
 import com.task.widget.model.WidgetSearchDto;
 import com.task.widget.repository.WidgetRepository;
 import com.task.widget.util.PageAssembler;
+import com.task.widget.util.WidgetDtoConverter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
@@ -31,11 +30,8 @@ public class WidgetService {
         Lock writeLock = rwLock.writeLock();
         writeLock.lock();
         try {
-            Widget widget = new Widget();
-            widget.setId(UUID.randomUUID());
-            widget.setLastModificationDate(LocalDateTime.now());
-            widget.setZzIndex(widgetDto.getZ());
-            BeanUtils.copyProperties(widgetDto, widget);
+            Widget widget = new Widget(UUID.randomUUID());
+            WidgetDtoConverter.convert(widgetDto, widget);
             return saveWidget(widget);
         } finally {
             writeLock.unlock();
@@ -48,9 +44,7 @@ public class WidgetService {
         try {
             Widget widget = repository.findById(id).orElseThrow(() -> new NotFoundException("Widget Not Found", id));
             repository.delete(widget);
-            widget.setLastModificationDate(LocalDateTime.now());
-            widget.setZzIndex(widgetDto.getZ());
-            BeanUtils.copyProperties(widgetDto, widget);
+            WidgetDtoConverter.convert(widgetDto, widget);
             return saveWidget(widget);
         } finally {
             writeLock.unlock();

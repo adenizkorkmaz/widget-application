@@ -32,6 +32,10 @@ public class Widget {
 
     private LocalDateTime lastModificationDate;
 
+    public Widget(UUID id) {
+        this.id = id;
+    }
+
     public Coordinate getLowerLeftCorner() {
         return new Coordinate(x - (width / 2), y - (height / 2));
     }
