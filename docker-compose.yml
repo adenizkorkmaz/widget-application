@@ -1,0 +1,14 @@
+version: '2.0'
+services:
+  widget-api:
+    container_name: widget-docker
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "1212:1212"
+    environment:
+      - JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:1212"
+      - STORAGE_TYPE=memory
+    command: /bin/bash -c "java -jar /app.jar"

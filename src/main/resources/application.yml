@@ -16,4 +16,5 @@ spring:
 
 
 storage:
-  type: memory
+  type: ${STORAGE_TYPE:memory}
+#  type : database
