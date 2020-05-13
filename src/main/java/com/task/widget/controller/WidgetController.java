@@ -29,6 +29,7 @@ import java.util.UUID;
 public class WidgetController {
     private final WidgetService widgetService;
     private final WidgetDtoAssembler widgetDtoAssembler;
+    private final PagedResourcesAssembler<Widget> pagedResourcesAssembler;
 
     @ApiOperation(
             value = "View all widgets",
@@ -42,7 +43,7 @@ public class WidgetController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public PagedModel<WidgetResponseDto> findAll(@Valid WidgetSearchDto searchDto,
-                                                 Pageable pageable, PagedResourcesAssembler<Widget> pagedResourcesAssembler) {
+                                                 Pageable pageable) {
         Page<Widget> all = widgetService.findAll(pageable, searchDto);
         return pagedResourcesAssembler.toModel(all, widgetDtoAssembler);
     }
