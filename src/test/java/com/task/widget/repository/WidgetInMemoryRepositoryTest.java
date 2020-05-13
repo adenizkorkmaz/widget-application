@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.SortedMap;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
@@ -23,7 +23,7 @@ class WidgetInMemoryRepositoryTest {
 
     @BeforeEach
     public void init() {
-        repository.getWidgets().clear();
+        repository.getWidgetMap().clear();
 
         widget = Widget.builder()
                 .id(UUID.randomUUID())
@@ -48,7 +48,7 @@ class WidgetInMemoryRepositoryTest {
 
         Widget save = repository.save(widget);
 
-        assertTrue(repository.getWidgets().contains(widget));
+        assertTrue(repository.getWidgetMap().containsValue(widget));
         assertEquals(save, widget);
     }
 
@@ -88,8 +88,8 @@ class WidgetInMemoryRepositoryTest {
     @Test
     void delete() {
         repository.delete(widget);
-        ConcurrentSkipListSet<Widget> widgets = repository.getWidgets();
-        assertEquals(1, widgets.size());
-        assertEquals(widget2, widgets.iterator().next());
+        SortedMap<Integer, Widget> widgetMap = repository.getWidgetMap();
+        assertEquals(1, widgetMap.size());
+        assertEquals(widget2, widgetMap.values().iterator().next());
     }
 }
